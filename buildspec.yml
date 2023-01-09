@@ -1,0 +1,35 @@
+version: 0.2
+env:
+  variables:
+    AWS_REGION: $AWS_REGION
+    AWS_ACCOUNT_ID: $AWS_ACCOUNT_ID
+    AWS_SERVICE_NAME: .dkr.ecr.
+    AWS_DOMAIN_NAME: .amazonaws.com
+    ECR_REPOSITORY: $ECR_REPOSITORY
+phases:
+  pre_build:
+    commands:
+      - aws --version
+      - REPOSITORY_URI="$AWS_ACCOUNT_ID$AWS_SERVICE_NAME$AWS_REGION$AWS_DOMAIN_NAME"
+      - echo Logging in to Amazon ECR...
+      - echo $REPOSITORY_URI
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REPOSITORY_URI
+      - aws ecr describe-repositories --repository-names $ECR_REPOSITORY || aws ecr create-repository --repository-name $ECR_REPOSITORY
+      - COMMIT_HASH1=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-10)
+      - IMAGE_TAG=${BRANCH_NAME}-${COMMIT_HASH1:=latest}
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...          
+      - docker build -t $REPOSITORY_URI/$ECR_REPOSITORY:$IMAGE_TAG -f './Dockerfile' .
+  post_build:
+    commands:
+      - echo Build completed
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI/$ECR_REPOSITORY:$IMAGE_TAG
+      - echo Writing definitions file...
+      - printf '[{"name":"docusaurus-ui","imageUri":"%s"}]' $REPOSITORY_URI/$ECR_REPOSITORY:$IMAGE_TAG > imagedefinitions.json
+      - cat imagedefinitions.json
+artifacts:
+    files:
+      - imagedefinitions.json
