@@ -7,8 +7,7 @@ RUN apk add npm
 RUN apk add yarn
 RUN apk add git
 COPY oauth2-authorized-users.conf /opt/
-RUN git clone https://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@github.com/nidhin077/new-page.git
-#RUN cd  new-page/
+COPY . /new-page
 WORKDIR new-page
 RUN npm i
 RUN npm run build
