@@ -10,7 +10,7 @@ phases:
   pre_build:
     commands:
       - aws --version
-      - REPOSITORY_URI=117373655737.dkr.ecr.us-east-1.amazonaws.com/docusaurus
+      - REPOSITORY_URI="$AWS_ACCOUNT_ID$AWS_SERVICE_NAME$AWS_REGION$AWS_DOMAIN_NAME$ECR_REPOSITORY"
       - echo Logging in to Amazon ECR...
       - echo $REPOSITORY_URI
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REPOSITORY_URI
