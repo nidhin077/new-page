@@ -26,9 +26,9 @@ phases:
     commands:
       - echo Build completed
       - echo Pushing the Docker images...
-      - docker push $REPOSITORY_URI:IMAGE_TAG
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Writing definitions file...
-      - printf '[{"name":"docusaurus-ui","imageUri":"%s"}]' $REPOSITORY_URI/$ECR_REPOSITORY:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"docusaurus-ui","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
       - cat imagedefinitions.json
 artifacts:
     files:
